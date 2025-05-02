@@ -1,0 +1,16 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Verify OTP{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {% load widget_tweaks %}
+    <h2>Please Verify Your OTP</h2>
+    {{ form.otp|add_class:"form-control w-25 border-2 border-warning mb-4"|attr:"placeholder:Enter OTP" }}
+    <button type="submit" class="btn btn-warning">Verify OTP</button>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</form>
+{% endblock %}

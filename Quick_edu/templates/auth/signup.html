@@ -1,0 +1,123 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<h2>Sign Up</h2>
+<form method="post" action="{% url 'signup' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% load widget_tweaks %}
+    <div class="col-7">
+        <!-- username -->
+        <div class="input-group">
+            <div class="input-group me-4">
+                <h5>UserName:</h5>
+            </div>
+            {{ user_form.username|add_class:"form-control border-2 border-warning" |attr:"placeholder:Enter Your Username" }}
+        </div>
+        
+            <div class="text-danger mb-3 " id="username-valid">{{ user_form.username.errors }}</div>
+        
+            <!-- firstname & lastname -->
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>First Name: </h5>
+                    </div>
+                    {{ user_form.first_name|add_class:"form-control border-2 border-warning"|attr:"placeholder:Enter Your First Name" }}
+                </div>
+                <div class="text-danger mb-4 " id="fname-valid"></div>
+            </div>
+            <div class="row col-lg">
+                <div class="col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Last Name: </h5>
+                    </div>
+                    {{ user_form.last_name|add_class:"form-control border-2 border-warning"|attr:"placeholder:Enter Your Last Name" }}
+                </div>
+                <div class="text-danger mb-4 " id="lname-valid"></div>
+            </div>
+        <!-- email -->
+        <div class="input-group">
+            <div class="input-group me-4">
+                <h5>Email Address:</h5>
+            </div>
+            {{ user_form.email|add_class:"form-control border-2 border-warning"|attr:"placeholder:Enter Your Email Address" }}
+        </div>
+        
+            <div class="error text-danger mb-3 " id="email-valid">{{ user_form.email.errors }}</div>
+        
+        <!-- password -->
+        <div class="input-group">
+            <div class="input-group me-4">
+                <h5>Password:</h5>
+            </div>
+            {{ user_form.password|add_class:"form-control border-2 border-warning"|attr:"placeholder:Enter Your Password" }}
+        </div>
+        <div class="text-danger mb-4 " id="password-valid"></div>
+        <!-- re-pass -->
+        <div class="input-group ">
+            <div class="input-group me-4">
+                <h5>Confirm Password:</h5>
+            </div>
+            {{ user_form.confirm_password|add_class:"form-control border-2 border-warning"|attr:"placeholder:Enter Your Confirm password" }}
+        </div>
+        <div class="text-danger mb-3" id="re-pass-valid"></div>
+        <!-- gender -->
+        <div class="input-group ">
+            <h5 class="">Gender:</h5>
+            <div class="ms-2 fs-5">
+                {{user_form.gender}}
+            </div>
+        </div>
+        <div class="text-danger mb-3" id="gender-valid"></div>
+        <!-- birth date -->
+        <div class="input-group row">
+            <h5>Birth Date:</h5>
+            {{ user_form.birth_date|add_class:"form-control border-2 border-warning ms-3" }}
+            <div class="text-danger mb-3" id="birthdate-valid"></div>
+        </div>
+        {% load i18n %}
+        {% get_available_languages as languages %}
+        <!-- country -->
+        <div class="input-group text-black select row">
+            <h5>Country:</h5>
+            <select class="form-select border-2 text-black border-warning ms-3" id="country" aria-label="Default select example" name="country">
+                <option class="form-select border-2 text-black border-warning ms-3" id="country" aria-label="Default select example" value="" selected disabled>{% translate "Select a country" %}</option>
+                {% for co in user_form.country %}
+                    <option value="{{ co.code }}" class="form-select border-2 text-black border-warning ms-3">{{ co }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="text-danger mb-3" id="country-valid"></div>
+        <!-- profile picture -->
+        <div class="input-group row">
+            <h5>Profile Picture:</h5>
+            {{ user_form.profile_picture|add_class:"form-control border-2 border-warning ms-3" }}
+            <div class="text-danger mb-3" id="profile-valid"></div>
+        </div>
+        <!-- resume -->
+        <div class="input-group row">
+            <h5>Resume:</h5>
+            {{ user_form.resume|add_class:"form-control border-2 border-warning ms-3"|attr:"placeholder:resume" }}
+            <div class="text-danger mb-3" id="resume-valid">
+            </div>
+        </div>
+        <!-- mobile_number -->
+        <div class="input-group row">
+            <h5>Mobile Number:</h5>
+            {{ user_form.mobile_number|add_class:"form-control border-2 border-warning ms-3"|attr:"placeholder:Enter Your Mobile Number" }}
+            <div class="text-danger mb-3" id="mobile-valid">
+                {{ user_form.mobile_number.error }}
+            </div>
+        </div>
+        <!-- Register -->
+        <button type="submit" id="register" class="btn btn-warning w-25 p-3" value="OK">Sign Up</button>
+        <a href="{% url 'home' %}">
+            <button type="button" class="btn btn-danger w-25 p-3">Home</button>
+        </a>
+
+
+    </div>
+</form>
+{% endblock %}

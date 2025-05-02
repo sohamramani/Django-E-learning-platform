@@ -1,0 +1,21 @@
+{% extends 'base/base.html' %}
+
+{% block title %}create courses{% endblock %}
+
+{% block content %}
+<h1>Course List</h1>
+
+    {% for course in courses %}
+        <div class="card border-warning border-2" style="width: 18rem;">
+            <img class="card-img-top" src="{{ course.image.url }}" alt="Card image cap">
+            <div class="card-body">
+                <h4 class="card-header mb-3 text-center">{{ course.title }}</h4>
+                <p class="card-text">{{ course.description }}</p>
+                <strong>Category: </strong>{{ course.category }}</span><br>
+                <strong>Start Date: </strong><span>{{ course.start_date }}</span><br> 
+                <strong>End Date: </strong><span>{{ course.end_date }}</span>
+                <a href="{% url 'course_detail' course.id %}" class="btn btn-dark mt-2">Learn More</a>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

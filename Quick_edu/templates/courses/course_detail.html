@@ -1,0 +1,13 @@
+{% extends 'base/base.html' %}
+
+{% block title %}create courses{% endblock %}
+
+{% block content %}
+<h1>{{ course.title }}</h1>
+<p><strong>Instructor:</strong> {{ course.course_creator }}</p>
+<p><strong>Start date:</strong> {{ course.start_date }}</p>
+<p><strong>End date:</strong> {{ course.end_date }}</p>
+<p><strong>Category:</strong> {{ course.category }}</p>
+<p>{{ course.description }}</p>
+<a href="{% url 'enroll_course' course.id %}" class="btn btn-dark mt-2">Enroll</a>
+{% endblock %}

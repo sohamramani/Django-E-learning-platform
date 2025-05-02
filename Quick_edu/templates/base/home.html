@@ -1,0 +1,66 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container row">
+  <div class="col-6 text-center d-flex flex-column justify-content-center">
+    <h1 class="text-start">Unlock Your Potential with Quick edu</h1>
+      <p class="text-start">Welcome to Quick edu, where learning knows 
+                          no bounds. We believe that education 
+                          is the key to personal and professional growth, 
+                          and we're here to guide you on your journey to success. 
+                          </p>
+      <button class=" btn btn-warning rounded-5 px-sm-5 py-2  cal-btn">Start your instructor journey</button>
+    </div>
+  <div class="col-6 text-end">
+    {% load static %}
+    <img src="{% static 'images/Start_your_instructor_journey.png' %}" alt="members" class="h-100 w-100">
+  </div>
+</div>
+<div class="container">
+  <div class="text-dark py-5 ">
+      <h1 class="text-center mb-4">Quick edu</h1>
+      <h3 class="text-center mb-4">Unlimited Learnig</h3>
+      <div class="d-grid gap-2 col-3 mx-auto">
+        <button class=" btn btn-warning rounded-5 px-sm-5 py-2  cal-btn">View Courses</button>
+      </div>
+      <p class=" text-center my-5 pb-5">
+          Designed for emerging creatives and 
+          established professionals, Quick edu builds your 
+          skills and empowers your passion </br> through pioneering 
+          courses in six domains.
+      </p> 
+  </div>
+</div>
+
+<div class="container row mb-5">
+  <div class="col-6 text-end">
+    {% load static %}
+    <img src="{% static 'images/Become_an_Instructor.png' %}" alt="Instructor" class="h-100 w-100">
+  </div>
+  <div class="col-6 text-center d-flex flex-column justify-content-center">
+    <h1 class="text-start">Become an Instructor</h1>
+      <p class="text-start">Instructors from around the 
+                          world teach millions of students on Byway. 
+                          We provide the tools and skills to teach what you love.
+                          </p>
+      <button class=" btn btn-dark  px-sm-5 py-1 me-5 ms-5  cal-btn">Start Your Instructor Journey |-></button>
+</div>
+
+<div class="container row mb-5">
+    <div class="col-6 text-center d-flex flex-column justify-content-center">
+      <h1 class="text-start">Transform your life through education</h1>
+        <p class="text-start">Learners around the world are 
+                            launching new careers, advancing in their 
+                            fields, and enriching their lives.
+                            </p>
+        <button class=" btn btn-dark  px-sm-5 py-1 me-5 ms-5  cal-btn">Checkout Courses |-></button>
+    </div>
+    <div class="col-6 text-end">
+      {% load static %}
+      <img src="{% static 'images/Transform_your_life_through_education.png' %}" alt="Instructor" class="h-100 w-100">
+    </div>
+</div>
+
+{% endblock %}
