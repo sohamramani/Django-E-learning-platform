@@ -1,29 +1,69 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Profile{% endblock %}
-
 {% block content %}
-<div class="container">
+<div class="container rounded bg-white mt-5 mb-5" style=" height: 1000px;">
     <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card border-warning border-2">
-                <div class="card-header border-warning">
-                    <h2 class="text-center">Profile Information</h2>
+        <div class="col-md-3 border-right">
+            <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                {% if userprofile.profile_picture %}
+                <img class="rounded-circle mt-5" width="150px" height="150px" src="{{ userprofile.profile_picture.url }}">
+                {% else %}
+                        <img src="" alt="profile picture" width="100" height="100">
+                {% endif %}
+                <span class="font-weight-bold">{{ user.username }}</span>
+                <span class="text-black-50">{{ user.email }}</span><span> </span>
+            </div>
+        </div>
+        <div class="col-md-5  ">
+            <div class="p-3 py-5 ">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-right">Profile Information</h4>
                 </div>
-                <div class="card-body">
-                    <h5 class="card-title">Username: {{ user.username }}</h5>
-                    <h5 class="card-title">Email: {{ user.email }}</h5>
-                    <h5 class="card-title">first name: {{ user.first_name }}</h5>
-                    <h5 class="card-title">last name: {{ user.last_name }}</h5>
-                    <h5 class="card-title">gender: {{userprofile.gender}}</h5>
-                    <h5 class="card-title">country: {{ userprofile.country.name }}</h5>
-                    <img src="{{ userprofile.profile_picture.url }}" alt="Picture" width="100" height="100">
-                    <h5 class="card-title">date of birth: {{ userprofile.birth_date }}</h5>
-                    <h5 class="card-title">Phone Number: {{ userprofile.mobile_number }}</h5>
-                    <h5 class="card-title">Resume: <a href="{{ userprofile.resume.url }}" target="_blank">Download</h5>
-                    <a href="{% url 'home' %}">
-                        <button type="submit" id="home" class="btn btn-danger w-25 p-3" value="OK">Home</button>
-                    </a>
+                <div class="row mt-3 fw-bolder">
+                    <div class="col-md-12">
+                        <label class="labels">Username:</label>
+                        {{ user.username }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="labels">Email:</label>
+                        {{ user.email }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="labels">First Name:</label>
+                        {{ user.first_name }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="labels">Last Name:</label>
+                        {{ user.last_name }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="labels">Gender: </label>
+                        {{userprofile.gender}}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="labels">Country:</label>
+                        {{ userprofile.country.name }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="labels">Date Of Birth:</label>
+                        {{ userprofile.birth_date }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="labels">Phone Number:</label>
+                        {{ userprofile.mobile_number }}
+                    </div>
+                    <div class="col-md-12 my-3">
+                        <!-- <a href="{{ presigned_url }}" download="{{ object_name }}">Download {{object_name}}</a> -->
+                        {% if userprofile.resume %}
+                            <h6 class="card-title">Resume: <a href="{% url 'download_file' %}" target="_blank">Download</h6>
+                        {% else %}
+                            <h6 class="card-title">Resume:</h6>
+                        {% endif %} 
+                    </div>
+                </div>
+                <a href="{% url 'home' %}">
+                    <button type="submit" id="home" class="btn btn-danger w-25 p-3" value="OK">Home</button>
+                </a>
             </div>
         </div>
     </div>

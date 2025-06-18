@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from pathlib import Path
 import os
+
+from pathlib import Path
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o_p!yle-9093#+1$94ow@eld=o*3bd93u+385#g#rse==^b8(q'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -30,8 +33,8 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,13 +42,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # application
-    'edu_user',
+    'django_crontab',
     'edu_courses',
+    'edu_user.apps.EduUserConfig',
+    'channels', 
     # third party
     'django_countries',
     'phonenumber_field',
     'widget_tweaks',
+    'social_django',
+    # APIs
+    'graphene_django',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -55,6 +64,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'edu_user.middleware.RequestLoggingMiddleware',
+    'edu_user.middleware.RoleBasedAdminMiddleware',
 ]
 
 ROOT_URLCONF = 'Quick_edu.urls'
@@ -69,6 +80,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                
+                # for social core auth 
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -126,23 +141,127 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# static sattings
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    "/home/soham/django-E-Learning Platform/Quick_edu/static",
+    os.path.join(BASE_DIR, 'static/'),
 ]
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# media settings
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+BASE_URL = 'http://localhost:8000'
+
+
+# phone number field settings
 PHONENUMBER_DEFAULT_REGION = 'IN'
 
-TWILIO_ACCOUNT_SID = 'AC5073dec841858fb06a3513386c227d97'
-TWILIO_AUTH_TOKEN = '4d9ab84d6edf4275b3da8ee3a993d479'
-TWILIO_PHONE_NUMBER = '+12406411747'
+
+# Twilio settings
+TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER')
+
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587  # Or your port
+EMAIL_USE_SSL = True  # Or False if you're using SSL
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')  # Use environment variable for security
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  # Use environment variable for security
+DEFAULT_FROM_EMAIL = 'ramanisoham234@gmail.com'
+
+
+# asgi settings
+ASGI_APPLICATION = 'Quick_edu.asgi.application'
+
+
+# Configure Channels layer with Redis
+CHANNEL_LAYERS = {
+    'default': {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}
+
+
+# Celery settings
+CELERY_broker_url = 'redis://localhost:6379/0'
+result_backend = 'redis://localhost:6379/0'
+task_serializer = 'json'
+accept_content = ['json']
+timezone = 'UTC'
+CELERY_enable_utc = True
+
+
+# logging settings
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+} 
+
+
+# allauth settings 
+LOGIN_REDIRECT_URL = "/"
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+]
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY= config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET= config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
+
+
+# django-minio-backend settings
+STORAGES = {
+    "default": {
+        "BACKEND": "django_minio_backend.models.MinioBackend",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "LOCATION": os.path.join(BASE_DIR, 'static/'),
+    },
+}
+MINIO_ENDPOINT = '127.0.0.1:9000'
+MINIO_ACCESS_KEY = config('MINIO_ACCESS_KEY')
+MINIO_SECRET_KEY = config('MINIO_SECRET_KEY')
+MINIO_STORAGE_MEDIA_BUCKET_NAME = 'django-resume'
+MINIO_MEDIA_FILES_BUCKET = 'django-resume'  # replacement for MEDIA_ROOT
+MINIO_PRIVATE_BUCKETS = [
+    'django-backend-dev-private',
+    'django-resume'
+]
+
+
+# razorpay settings
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET')
+
+
+# cashfree settings
+CASHFREE_APP_ID = config('CASHFREE_APP_ID')
+CASHFREE_SECRET_KEY = config('CASHFREE_SECRET_KEY')
+
+
+# Graphene settings
+GRAPHENE = {
+    "SCHEMA": "Quick_edu.schema.schema"
+}

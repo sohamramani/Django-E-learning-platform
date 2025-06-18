@@ -1,0 +1,9 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div style=" min-height: 1000px;">
+    <div class="alert alert-success fs-4">Payment Successful!</div>
+    <h3>Thank you for your payment</h3>
+    <a href="{% url 'home' %}" class="btn btn-warning mt-4">Go to Home</a>
+</div>
+{% endblock %}

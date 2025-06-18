@@ -1,0 +1,9 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div style=" min-height: 1000px;">
+    <div class="alert alert-danger fs-4">Payment Failed!</div>
+    <h3>Your payment was not completed. Please try again.</h3>
+    <a href="{% url 'home' %}" class="btn btn-warning mt-4">Go to Home</a>
+</div>
+{% endblock %}

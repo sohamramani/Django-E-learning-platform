@@ -1,0 +1,24 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container" style=" height: 1000px;">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card border-warning border-2">
+                <div class="card-header border-warning">
+                    <h2 class="text-center">Generate Reports</h2>
+                </div>
+                <div class="card-body">
+                    <h5>Generate Student report: </h5>
+                    <a href="{% url 'student_report' 'student_report' %}">
+                        <button type="submit" id="student_report" class="btn btn-warning w-50 p-3" value="student_report">Student report</button>
+                    </a>
+                    <h5>Generate Course report: </h5>
+                    <a href="{% url 'course_report' 'course_report' %}">
+                        <button type="submit" id="course_report" class="btn btn-warning w-50 p-3" value="course_report">Course report</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

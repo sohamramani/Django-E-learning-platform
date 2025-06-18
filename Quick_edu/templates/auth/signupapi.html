@@ -1,0 +1,194 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<h2>Sign Up</h2>
+<form id="registerForm" action="{% url 'signupapi' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="col-7">
+        <!-- username -->
+        <div class="input-group mb-3">
+            <div class="input-group me-4">
+                <h5>UserName:</h5>
+            </div>
+            <div class="form-group col">
+            <input class="form-control border-2 border-warning" type="text" name="username" id="username" placeholder="Username" required />
+            </div>
+        </div>
+        <!-- firstname & lastname -->
+        <div class="row col-lg mb-3">
+            <div class=" col input-group ">
+                <div class="input-group">
+                    <h5>First Name: </h5>
+                </div>
+                <input type="text" class="form-control border-2 border-warning"  name="first_name" id="first_name" placeholder="first_name" />
+            </div>
+        </div>
+        <div class="row col-lg mb-3">
+            <div class="col input-group ">
+                <div class="input-group">
+                    <h5>Last Name: </h5>
+                </div>
+                <input type="text" class="form-control border-2 border-warning"  name="last_name" id="last_name" placeholder="last_name" />
+            </div>
+        </div>
+        <!-- email -->
+        <div class="input-group mb-3">
+            <div class="input-group me-4">
+                <h5>Email Address:</h5>
+            </div>
+            <div class="form-group col">
+                <input type="email" class="form-control border-2 border-warning"  name="email" id="email" placeholder="Email" required />
+            </div>
+        </div>
+
+        <!-- password -->
+        <div class="input-group mb-3">
+            <div class="input-group ">
+                <h5>Password:</h5>
+            </div>
+            <div class="form-group col me-3">
+                <input type="password" class="form-control border-2 border-warning"  name="password" id="password" placeholder="Password" required />
+            </div>
+            <span>
+                <input type="checkbox" class="" onclick="password.type = this.checked ? 'text' : 'password'">
+            </span>
+        </div>
+        <!-- gender -->
+        <div class="input-group mb-3 ">
+            <h5 class="">Gender:</h5>
+            <div class="ms-2 fs-5">
+                <input type="radio" id="male" name="gender" value="male">
+                <label for="male">Male</label><br>
+                <input type="radio" id="female" name="gender" value="female">
+                <label for="female">Female</label><br>
+            </div>
+        </div>
+
+        
+        <!-- birth date -->
+        <div class="input-group row mb-3">
+            <div class="input-group ">
+                <h5>Birth Date:</h5>
+            </div>
+            <div class="form-group col">
+                <input type="date" class="form-control border-2 border-warning"  name="birth_date" id="birth_date" placeholder="Birth Date" />
+            </div>
+        </div>
+
+        <!-- country -->
+        <div class="input-group text-black select row mb-3">
+            <h5>Country:</h5>
+            <select class="form-select border-2 text-black border-warning ms-3" id="country" aria-label="Default select example" name="country">
+                {% for code, name in country %}
+                    <option value="{{ code }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- profile picture -->
+        <div class="input-group row mb-3">
+            <div class="input-group ">
+                <h5>Profile Picture:</h5>
+            </div>
+            <div class="form-group col">
+                <input type="file" class="form-control border-2 border-warning"  name="profile_picture" id="profile_picture" placeholder="Profile Picture URL" />
+            </div>
+        </div>
+
+        <!-- resume -->
+        <div class="input-group row mb-3">
+            <div class="input-group ">
+                <h5>Resume:</h5>
+            </div>
+            <div class="form-group col">
+                <input type="file" class="form-control border-2 border-warning"  name="resume" id="resume" placeholder="Resume URL" />
+            </div>
+        </div>
+
+        <!-- mobile_number -->
+        <div class="input-group row mb-3">
+            <div class="input-group ">
+                <h5>Mobile Number:</h5>
+            </div>
+            <div class="form-group col">
+                <input type="tel" class="form-control border-2 border-warning"  name="mobile_number" id="mobile_number" placeholder="Mobile Number" />
+            </div>
+        </div>
+
+        <!-- Register -->
+        <button type="submit" id="register" class="btn btn-warning w-25 p-3" value="OK">Sign Up</button>
+    </div>
+</form>
+
+<script>
+const form = document.getElementById('registerForm');
+form.onsubmit = async function(e) {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    const mutation = `
+        mutation RegisterUser(
+            $username: String!, $password: String!, $first_name: String!,
+            $last_name: String!, $email: String!,
+            $gender: String, $birth_date: Date, $country: String,
+            $profile_picture: Upload, $mobile_number: String,
+            $resume: Upload
+        ) {
+            registerUser(
+                username: $username, password: $password, firstName: $first_name,
+                lastName: $last_name, email: $email,
+                gender: $gender, birthDate: $birth_date, country: $country,
+                profilePicture: $profile_picture, mobileNumber: $mobile_number,
+                resume: $resume
+            ) {
+                user { id username email }
+                profile { id gender birthDate country }
+            }
+        }
+    `;
+
+    formData.append('operations', JSON.stringify({
+        query: mutation,
+        variables: {
+            username: form.username.value,
+            password: form.password.value,
+            first_name: form.first_name.value,
+            last_name: form.last_name.value,
+            email: form.email.value,
+            gender: form.gender.value,
+            birth_date: form.birth_date.value,
+            country: form.country.value,
+            profile_picture: null, // will be mapped below
+            mobile_number: form.mobile_number.value,
+            resume: null // will be mapped below
+        }
+    }));
+
+    formData.append('map', JSON.stringify({
+        '0': ['variables.profile_picture'],
+        '1': ['variables.resume']
+    }));
+
+    if (form.profile_picture.files[0]) {
+        formData.append('0', form.profile_picture.files[0]);
+    }
+    if (form.resume.files[0]) {
+        formData.append('1', form.resume.files[0]);
+    }
+
+    const response = await fetch('/graphql/', {
+        method: 'POST',
+        body: formData
+    });
+
+    const result = await response.json();
+    if (result.data && result.data.registerUser) {
+        alert('Registration successful!');
+        window.location.href = `/users/verify_otp/${result.data.registerUser.user.id}/`;
+    } else {
+        alert('Registration failed!');
+        console.error(result.errors);
+    }
+};
+</script>
+{% endblock %}

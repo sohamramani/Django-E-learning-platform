@@ -1,13 +1,51 @@
 {% extends 'base/base.html' %}
 
-{% block title %}create courses{% endblock %}
-
 {% block content %}
-<h1>{{ course.title }}</h1>
-<p><strong>Instructor:</strong> {{ course.course_creator }}</p>
-<p><strong>Start date:</strong> {{ course.start_date }}</p>
-<p><strong>End date:</strong> {{ course.end_date }}</p>
-<p><strong>Category:</strong> {{ course.category }}</p>
-<p>{{ course.description }}</p>
-<a href="{% url 'enroll_course' course.id %}" class="btn btn-dark mt-2">Enroll</a>
+<div class="card mb-3 border-2 border-warning" style=" height: 1000px;">
+    <div class="row g-0">
+        <div class="col-md-7">
+            <div class="card-body pt-5 ps-5">
+                <h1 class="card-title ">{{ object.title }}</h1>
+                <p class="card-text"><strong>Instructor:</strong> {{ object.course_creator }}</p>
+                <p class="card-text"><strong>Category:</strong><small class="text-muted"> {{ object.category }}</small></p>
+                <p class="card-text"><strong>Start date:</strong> {{ object.start_date }}</p>
+                <p class="card-text"><strong>End date:</strong> {{ object.end_date }}</p>
+            </div>
+        </div>
+        <div class="col-md-5 text-end">
+        {% if object.image %}
+                <img src="{{ object.image.url }}" class="img-fluid rounded-start border border-2 border-black" alt="..." style=" width: 550px; height: 350px;">
+        {% else %}
+                <img class="card-img-top border-2 border-black" src="" alt="image" >
+        {% endif %} 
+        </div>
+        <div class="w-75 bg-black p-1 mb-1" style="margin: 40px 150px 20px 150px ;""></div>
+
+        <div class="pt-5 ps-5 col-md-7 fs-5 mt-5">
+            <h1 class="card-title ">Description Of Course</h1>
+            <p class="card-text">{{ object.description }}</p>
+        </div>
+        <div class="col-md-5 text-center mt-5">
+            <h4 class="card-text mb-4">{{ object.course_creator.first_name}} {{ object.course_creator.first_name}}, <small class="fs-6">{{ object.course_creator.userprofile.country.name }}</small></h4>
+            <h3 class="card-text ">$240.00  + Tax</h3>
+            <a href="{% url 'enroll_course' object.id %}" class="btn btn-dark mt-2 rounded-5 py-2" style="padding-left: 130px; padding-right: 130px;">Enroll</a>
+            <a href="{% url 'course_list' %}" class="btn btn-light border-black border-2 mt-3 rounded-5 py-2" style="padding-left: 80px; padding-right: 80px;">Back to Course List</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const ewsProtocol = (window.location.protocol == "https:" ? "wss:" : "ws:");
+const ws_enroll_Url = ewsProtocol + "//" + window.location.host + '/ws/enrollments/';
+const esocket = new WebSocket(ws_enroll_Url);
+
+esocket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === 'enrollment_alert') {
+        alert(`Enrollment Alert: ${data.message} for user ${data.username}`); // Display in an alert for now
+    }
+    };
+</script>
+
 {% endblock %}

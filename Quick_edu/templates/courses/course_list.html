@@ -1,21 +1,60 @@
 {% extends 'base/base.html' %}
 
-{% block title %}create courses{% endblock %}
-
 {% block content %}
 <h1>Course List</h1>
-
+<div class="card-group row row-cols-1 row-cols-md-3 g-4" >
     {% for course in courses %}
-        <div class="card border-warning border-2" style="width: 18rem;">
-            <img class="card-img-top" src="{{ course.image.url }}" alt="Card image cap">
-            <div class="card-body">
-                <h4 class="card-header mb-3 text-center">{{ course.title }}</h4>
-                <p class="card-text">{{ course.description }}</p>
-                <strong>Category: </strong>{{ course.category }}</span><br>
-                <strong>Start Date: </strong><span>{{ course.start_date }}</span><br> 
-                <strong>End Date: </strong><span>{{ course.end_date }}</span>
-                <a href="{% url 'course_detail' course.id %}" class="btn btn-dark mt-2">Learn More</a>
+        <div class="col-4">
+            <div class="card border-warning border-2 h-100" >
+                {% if course.image %}
+                <img class="card-img-top" src="{{ course.image.url }}" alt="Card image cap" style="width: 412px; height: 200px;">
+                {% else %}
+                <img class="card-img-top" src="" alt="image" style="width: 412px; height: 200px;">
+                {% endif %}
+                <div class="card-body">
+                    <h4 class="card-header mb-3 text-center">{{ course.title }}</h4>
+                    <p class="card-text col-auto">{{ course.description }}</p>
+                </div>
+                <div class="card-text ms-3">
+                    <strong>Category: </strong>{{ course.category }}</span><br>
+                    <strong>Start Date: </strong><span>{{ course.start_date }}</span><br> 
+                    <strong>End Date: </strong><span>{{ course.end_date }}</span>
+                </div>
+                
+                <div class="card-footer">
+                    <a href="{% url 'course_detail' course.id %}" class="btn btn-dark mt-2">Learn More</a>
+                </div>
             </div>
         </div>
     {% endfor %}
+</div>
+<div class="pagination row mt-5 mb-5">
+    <div class="col-5 row">
+        <div class="col-6 text-start ">
+            {% if page_obj.has_previous %}
+            <span class="hover"><a href="?page=1" class="text-black fs-5 text-decoration-none fw-bold">&lt; First Page</a></span>
+        </div>
+        <div class="col-6 text-end">
+            <span class="hover"><a href="?page={{ page_obj.previous_page_number }}" class="text-black fs-5 text-decoration-none fw-bold">&laquo; Previous Page</a></span>
+            {% endif %}
+        </div>       
+    </div>
+    
+
+    <div class="col-2 text-center">
+        <span class="current text-black fs-5 fw-bold ">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+    </div>
+    <div class="col-5 row">
+        <div class="col-6 text-start">
+            {% if page_obj.has_next %}
+            <span class="hover"><a href="?page={{ page_obj.next_page_number }}" class="text-black fs-5 text-decoration-none fw-bold">Next Page &raquo;</a></span>
+        </div>
+        <div class="col-6 text-end">
+            <span class="hover"><a href="?page={{ page_obj.paginator.num_pages }}" class="text-black fs-5 text-decoration-none fw-bold">Last Page &gt;</a></span>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

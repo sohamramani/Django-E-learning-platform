@@ -1,25 +1,26 @@
-from urllib import request
-from django.db import models
-from django.contrib.auth.models import User
 from django_extensions.db.models import TimeStampedModel
+from django.contrib.auth.models import User
+from django.db import models
 from django.utils.text import slugify
 
-# Create your models here.
+
 class Category(TimeStampedModel):
     name = models.CharField("name", max_length=255)
     description = models.TextField("description", blank=True, null=True)
     slug = models.SlugField("slug", unique=True)
+    
     def save(self, *args, **kwargs):
             self.slug = slugify(self.name)
             super(Category, self).save(*args, **kwargs)
-
+    
     def __str__(self):
         return f"{self.name}"
     
     class Meta:
         db_table = 'category'
         verbose_name = 'Category'
-        
+
+
 class Courses(TimeStampedModel):
     title = models.CharField("title", max_length=255)
     description = models.TextField("description", blank=True, null=True)

@@ -1,32 +1,42 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Log In{% endblock %}
-
 {% block content %}
-<h2>Log In</h2>
-<form method="post" action="{% url 'login' %}">
-    {% csrf_token %}
-    <div class="col-7">
-        <!-- username -->
-        <div class="input-group">
-            <div class="input-group me-4">
-                <h5>UserName:</h5>
+{% load static %}
+<div style=" min-height: 1000px;">
+    <h2>Log In</h2>
+    <form id="loginform" method="post" action="{% url 'login' %}" >
+        {% csrf_token %}
+        <div class="col-7">
+            <!-- username -->
+            <div class="input-group">
+                <div class="input-group me-4">
+                    <h5>UserName:</h5>
+                </div>
+                <div class="form-group col">
+                    <input id="username" type="text" class="form-control border-2 border-warning" placeholder="User Name" name="username">
+                </div>
             </div>
-            <input id="username" type="text" class="form-control border-2 border-warning" placeholder="User Name" name="username">
+            <div class="text-danger mb-3 " id="username-valid"></div>
+            <!-- password -->
+            <div class="input-group">
+                <div class="input-group me-4">
+                    <h5>Password:</h5>
+                </div>
+                <div class="form-group col">
+                    <input id="pass" autocomplete="on" type="password" name="password" class="form-control border-2 border-warning" placeholder="Password">
+                </div>
+            </div>
+            <div class="text-danger mb-4 " id="password-valid"></div>
+            <button type="submit" class="btn btn-warning w-25 p-3">Log In</button>
         </div>
-        <div class="text-danger mb-3 " id="username-valid"></div>
+    </form>
+    <p>Don't have an account? <a href="{% url 'signup' %} " class=" text-decoration-none fs-6 m-2 text-black fw-bold">Sign Up</a></p>
+    <p>Don't remember your password? <a class="text-decoration-none text-black m-2 fs-6 fw-bolder" href="{% url 'password_reset_request' %}">Forgot Password</a></p>
+    <p>Login with Google?<a class="text-decoration-none text-black m-2 fs-6 fw-bolder" href="{% url 'social:begin' 'google-oauth2' %}">Google</a></p>
+</div>
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'js/additional-methods.js' %}"></script>
+<script src="{% static 'js/jquery.validate.js' %}"></script>
+<script src="{% static 'js/login.js' %}"></script>
 
-        <!-- password -->
-        <div class="input-group">
-            <div class="input-group me-4">
-                <h5>Password:</h5>
-            </div>
-            <input id="pass" autocomplete="on" type="password" name="password" class="form-control border-2 border-warning" placeholder="Password">
-        </div>
-        <div class="text-danger mb-4 " id="password-valid"></div>
-        <button type="submit" class="btn btn-warning w-25 p-3">Log In</button>
-    </div>
-    
-</form>
-<p>Don't have an account? <a href="{% url 'signup' %} " class="fs-4 fw-bold">Sign Up</a></p>
 {% endblock %}

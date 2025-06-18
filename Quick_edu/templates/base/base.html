@@ -8,8 +8,7 @@
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="shortcut icon" href="#">
     <!-- css  -->
     <style>
         .hover:hover {
@@ -18,59 +17,71 @@
             text-decoration-thickness:5px ;
             text-underline-offset: 10px;
         }
+        label.error {
+            color: #ff0400;
+            font-size: medium;
+            font-weight: bold;
+            padding:1px 20px 1px 20px;
+        }  
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        
     </style>
 </head>
 <body>
-    <header class=" bg-black shadow-lg p-3 mb-5 bg-white rounded">
+    <header class="shadow-lg p-3 mb-5 bg-white rounded">
         <div class="container p-0">   
             <nav class="navbar navbar-expand-lg" >
                 <div class="collapse navbar-collapse" id="n_bar">
                     <div class="col-lg-2 d-flex d-lg-block align-items-center  flex-column">
                         <a href="{% url 'home' %}"> <img src="{% static 'images/quick-edu-logo.png' %}" alt="Logo" class="float-end w-100 h-100" ></a>
                     </div>
-                    <div class="navbar-menu col-lg-5 ">
+                    <div class="navbar-menu col-lg-8 ">
                         <div class="navbar-menu-2 d-flex d-lg-block align-items-center justify-content-between flex-column">
                             {% if user.is_authenticated %}
                                 {% if request.user.groups.all.0.name != course_creator %}
                                     <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'create_courses' %}">Create Courses</a></span>
                                 {% endif %}
-                                <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'course_list' %}">Courses</a></span>
+                                    <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'course_dashboard' %}">Course Dashboard</a></span>
+                                    <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'course_list' %}">Courses</a></span>
+                                    <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'checkout_payment' %}">Subscription</a></span>
                             {% endif %}
-                            <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="#about">About</a></span>
-                            <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="#faq">FAQ</a></span>
+                            
                         </div> 
                     </div>
-                    <div class="navbar-menu col-lg-5">
+                    <div class="navbar-menu col-lg-4">
                         <div class="d-flex d-lg-block align-items-center justify-content-between flex-column text-end">
                         {% if user.is_authenticated %}
                             <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'profile' %}">Pofile</a></span>
                             <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'logout' %}">Logout</a></span>
-                            <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'password_change' %}">ResetPassword</a></span>
                         {% else %}
                             <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'login' %}">Login</a></span>
                             <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'signup' %}">Register</a></span>
+                            <span class="hover"><a class="text-decoration-none text-black m-2 fs-4 fw-bolder" href="{% url 'signupapi' %}">Register with api</a></span>
                         {% endif %}
                         </div>
                     </div>
                 </div>
             </nav>
         </div>
-
         {% if messages %}
             {% for message in messages %}
-                {% if user.is_authenticated %}
+                {% if message.tags == 'success' %}
                     <div class=" alert alert-success w-25 d-flex justify-content-between float-end alert-dismissible">
                         <span>
-                            {{ message }} <strong>{{ user.username }}</strong>.
+                            <strong class="{{ message.tags }}"> {{ message }} </strong>
                         </span>
-                        <a href="#" class="close text-decoration-none text-black" data-dismiss="alert" aria-label="close">&times;</a>
+                        <a href="" class="close text-decoration-none text-black" data-dismiss="alert" aria-label="close">&times;</a>
                     </div>
-                {% else %}
-                    <div class="alert  alert-danger w-25 d-flex justify-content-between float-end alert-dismissible">
+                {% endif %}
+                {% if message.tags == 'error' %}
+                    <div class=" alert alert-danger w-25 d-flex justify-content-between float-end alert-dismissible">
                         <span>
-                            {{ message }}
+                            <strong class="{{ message.tags }}"> {{ message }} </strong>
                         </span>
-                        <a href="#" class="close text-decoration-none text-black" data-dismiss="alert" aria-label="close">&times;</a>
+                        <a href="" class="close text-decoration-none text-black" data-dismiss="alert" aria-label="close">&times;</a>
                     </div>
                 {% endif %}
             {% endfor %}
@@ -78,64 +89,79 @@
     </header>
 
 
-    <div class="container">
-        <!-- Page Content -->
+<!-- main content section -->
+<main>
+    <div class="container" >
         {% block content %}
+        
         {% endblock %}
     </div>
+</main>
 
 
-    <!-- footer-section -->
-    <footer class=" shadow-lg mt-5 bg-white rounded">
-        <div class="container p-0">
-            <div class="text-black row my-5 text-center text-lg-start fs-5 fw-bold">
-                <div class="col-lg-4 mb-5">
-                    <p>Contact Us</p>
-                    <p>International: +966-13-816-9799</p>
-                    <p>Toll Free: 800-122-1224</p>
-                    <p>Email: sohamramani20@gmail.com</p>
-                </div>
-                <div class="col-lg-4 mb-5">
-                    <p>Quick Links</p>
-                    <p>About Quick edu</p>
-                    <p>Courses</p>
-                    <p>Coaching</p>
-                    <p>FAQ</p>
-                    <p>About Quick edu</p>
-                    <p>Visit Quick edu</p>
-                    <p>Quick edu Website</p>
-                </div>
-                <div class="col-lg-4 mb-5">
-                    <p>Quick Links</p>
-                    <p>About Quick edu</p>
-                    <p>Courses</p>
-                    <p>Coaching</p>
-                    <p>FAQ</p>
-                    <p>About Quick edu</p>
-                    <p>Visit Quick edu</p>
-                    <p>Quick edu Website</p>
-                </div>
+<!-- footer-section -->
+<footer class="shadow-lg mt-5 pt-5 px-3 bg-white rounded">
+    <div class="container p-0">
+        <div class="text-black row my-5 text-center text-lg-start fs-5 fw-bold">
+            <div class="col-lg-6 mb-5 text-center">
+                <p>Contact Us : </p>
+                <p>International: +966-13-816-9799</p>
+                <p>Toll Free: 800-122-1224</p>
+                <p>Email: sohamramani20@gmail.com</p>
             </div>
-            <!-- footer-brand-section -->
-            <div class="text-black row ">
-                <div class="col-lg-8 text-center d-lg-flex align-items-lg-end mb-4">
-                    <i class="fa-brands fa-facebook fa-xl me-3" ></i>
-                    <i class="fa-brands fa-square-instagram fa-xl me-3"></i>
-                    <i class="fa-brands fa-twitter fa-xl me-3"></i>
-                    <i class="fa-brands fa-youtube fa-xl me-3"></i>
-                </div>
-                <div class="col-lg-4 mb-3">
-                    <a href="{% url 'home' %}"> <img class="mx-auto d-block w-75 h-75" src="{% static 'images/quick-edu-logo.png' %}" alt="Logo"></a>
-                </div>
-            </div>
-            <div class=" container bg-black p-1 mb-3"></div>
-            <!-- Terms & Conditions section -->
-            <div class="text-black row fs-5 fw-bold">
-                <p class="col-lg-7 text-center text-lg-start">© 2021 Saudi Aramco Oil Co. King Abdulaziz Center for World Culture </p>
-                <p class="col-lg-3 text-center text-lg-start">Terms & Conditions</p>
-                <p class="col-lg-2 text-center text-lg-start">Privacy Policy</p>
+            <div class="col-lg-6 d-flex justify-content-between text-center align-content-between flex-column mb-5">
+                <span class="hover mb-2"><a class="text-decoration-none text-black" href="{% url 'course_list' %}">Courses</a></span>
+                <span class="hover mb-2"><a class="text-decoration-none text-black" href="{% url 'become_an_instructor' %}">Become An Instructor</a></span>
+                <span class="hover mb-2"><a class="text-decoration-none text-black" href="{% url 'checkout_payment' %}">Subscription</a></span>
+                <span class="hover mb-2"><a class="text-decoration-none text-black" href="{% url 'home' %}">Visit Quick edu</a></span>
             </div>
         </div>
-    </footer>
+        <!-- footer-brand-section -->
+        <div class="text-black row ">
+            <div class="col-lg-8 text-center d-lg-flex align-items-lg-end mb-4">
+                <i class="fa-brands fa-facebook fa-xl me-3" ></i>
+                <i class="fa-brands fa-square-instagram fa-xl me-3"></i>
+                <i class="fa-brands fa-twitter fa-xl me-3"></i>
+                <i class="fa-brands fa-youtube fa-xl me-3"></i>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <a href="{% url 'home' %}"> <img class="mx-auto d-block w-75 h-75" src="{% static 'images/quick-edu-logo.png' %}" alt="Logo"></a>
+            </div>
+        </div>
+        <div class=" container bg-black p-1 mb-3"></div>
+        <!-- Terms & Conditions section -->
+        <div class="text-black row fs-5 fw-bold">
+            <p class="col-lg-7 text-center text-lg-start">© 2021 Saudi Aramco Oil Co. King Abdulaziz Center for World Culture </p>
+            <p class="col-lg-3 text-center text-lg-start">Terms & Conditions</p>
+            <p class="col-lg-2 text-center text-lg-start">Privacy Policy</p>
+        </div>
+    </div>
+</footer>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js.map' %}"></script>
+
+
+
+<script>
+const wsProtocol = (window.location.protocol == "https:" ? "wss:" : "ws:");
+const ws_course_Url = wsProtocol + "//" + window.location.host + '/ws/course_updates/';
+const socket = new WebSocket(ws_course_Url);
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+            Swal.fire({
+            title: 'New Courses Announcement',
+            text: data.message,
+            icon: 'info',
+            confirmButtonText: 'OK'
+            })
+    }
+    socket.onopen = function(e) {
+        console.log("Connection open for courses");
+    };
+    socket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+</script>
 </body>
 </html>

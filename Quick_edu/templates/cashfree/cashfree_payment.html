@@ -1,0 +1,33 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div style=" min-height: 1000px;">
+    <div class="container">
+        <input type="hidden" name="payment_session_id" value="{{ payment_session_id }}" id="paymentSessionId">
+        <input type="hidden" name="return_url" value="http://127.0.0.1:8000/" id="returnUrl">
+        <div class="col col-lg-4 col-sm-10 col-xs-12">
+            <div class="row">
+                <div class="col-12 bank col" bfor="qr">
+                    <button class="btn btn-block btn-full w-100 btn-primary" id="checkout">
+                        Confirm Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Cashfree SDK -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+<script>
+    const cash = Cashfree({ mode: "sandbox" });
+    document.getElementById("checkout").addEventListener("click", function () {
+        cash.checkout({
+                paymentSessionId: document.getElementById("paymentSessionId").value,
+                returnUrl: document.getElementById("returnUrl").value,
+            })
+            .then(function () {
+                console.log("on going redirection");
+            });
+    });
+</script>
+{% endblock %}

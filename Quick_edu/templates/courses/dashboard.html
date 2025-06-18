@@ -1,0 +1,60 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+{% for enrollment in enrolled_courses %}
+<div style=" min-height: 1000px;">
+    <div class="card mb-3 border-2 border-warning overflow-auto" style="max-width: 840px; height: 205px;">
+        <div class="row g-0">
+            <div class="col-md-4">
+                {% if enrollment.course.image %}
+                    <img src="{{ enrollment.course.image.url }}" class="img-fluid rounded-start" alt="..." style="width: 280px; height: 201px;">
+                {% else %}
+                    <img class="card-img-top" src="" alt="image" >
+                {% endif %}    
+            </div>
+            <div class="col-md-8">
+                <div class="card-body ">
+                    <h5 class="card-title">{{ enrollment.course.title }}</h5>
+                    <p class=" card-text">{{ enrollment.course.description}}</p>
+                    <p class="card-text">Category: <small class="text-muted">{{ enrollment.course.category }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <li>No enrolled courses yet.</li>
+    {% endfor %}
+
+
+    <div class="pagination row mt-5 mb-5">
+        <div class="col-5 row">
+            <div class="col-6 text-start ">
+                {% if page_obj.has_previous %}
+                <span class="hover"><a href="?page=1" class="text-black fs-5 text-decoration-none fw-bold">&lt; First Page</a></span>
+            </div>
+            <div class="col-6 text-end">
+                <span class="hover"><a href="?page={{ page_obj.previous_page_number }}" class="text-black fs-5 text-decoration-none fw-bold">&laquo; Previous Page</a></span>
+                {% endif %}
+            </div>       
+        </div>
+
+
+        <div class="col-2 text-center">
+            <span class="current text-black fs-5 fw-bold ">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+        </div>
+        <div class="col-5 row">
+            <div class="col-6 text-start">
+                {% if page_obj.has_next %}
+                <span class="hover"><a href="?page={{ page_obj.next_page_number }}" class="text-black fs-5 text-decoration-none fw-bold">Next Page &raquo;</a></span>
+            </div>
+            <div class="col-6 text-end">
+                <span class="hover"><a href="?page={{ page_obj.paginator.num_pages }}" class="text-black fs-5 text-decoration-none fw-bold">Last Page &gt;</a></span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
