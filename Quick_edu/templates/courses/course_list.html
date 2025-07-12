@@ -6,10 +6,11 @@
     {% for course in courses %}
         <div class="col-4">
             <div class="card border-warning border-2 h-100" >
+                {% load static %}
                 {% if course.image %}
-                <img class="card-img-top" src="{{ course.image.url }}" alt="Card image cap" style="width: 412px; height: 200px;">
+                    <img class="card-img-top" src="{{ course.image.url }}" alt="Course image" style="width: 412px; height: 200px;">
                 {% else %}
-                <img class="card-img-top" src="" alt="image" style="width: 412px; height: 200px;">
+                    <img class="card-img-top" src="" alt="No image" style="width: 412px; height: 200px;">
                 {% endif %}
                 <div class="card-body">
                     <h4 class="card-header mb-3 text-center">{{ course.title }}</h4>

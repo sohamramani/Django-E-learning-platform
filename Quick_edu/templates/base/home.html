@@ -10,7 +10,15 @@
                           and we're here to guide you on your journey to success. 
                           </p>
       <a href="{% url 'become_an_instructor' %}" class="btn btn-warning rounded-5 px-sm-2 py-2  cal-btn">Start your instructor journey</a>
-
+      {% if user.is_authenticated %}
+        {% if request.user.groups.all.0.name != course_creator %}
+          <a href="{% url 'create_courses_api' %}" class="btn btn-danger rounded-5 px-sm-2 py-2  cal-btn">create courses with api</a>
+        {% endif %}
+        <a href="{% url 'course_list_api' %}" class="btn btn-success rounded-5 px-sm-2 py-2  cal-btn">view courses with api</a>
+      {% else %}
+        <a href="{% url 'signupapi' %}" class="btn btn-dark rounded-5 px-sm-2 py-2  cal-btn">Rgister with api</a>
+      {% endif %}
+      
       {% if user.is_authenticated %}
           {% if request.user.groups.all.0.name != course_creator and request.user.groups.all.1.name != student %}
                   <button class="btn btn-dark px-2 py-2 rounded-5" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Report & random</button>

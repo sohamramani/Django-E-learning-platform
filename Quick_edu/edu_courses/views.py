@@ -25,6 +25,14 @@ from edu_courses.consumers import CourseNotificationConsumer
 
 logger = logging.getLogger(__name__)
 
+def create_courses_api(request):
+    catagory_choices = Category.objects.all()
+    return render(request, 'courses/create_courses_api.html', {'catagory_choices': catagory_choices})
+
+def course_list_api(request):
+    can_create = request.user.is_superuser or request.user.groups.filter(name='course_creator').exists()
+    return render(request, 'courses/course_list_api.html', {'can_create': can_create})
+
 
 # only admin and course_creater can create course
 @method_decorator(permission_required(['edu_courses.add_courses','edu_courses.change_courses',

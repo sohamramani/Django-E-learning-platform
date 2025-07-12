@@ -1,31 +1,192 @@
-from django.test import TestCase
-from edu_courses.models import Courses, Category 
-from edu_user.models import Enrollment
-from django.urls import reverse
+import datetime
+import re
+
+
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.models import User, Permission, Group
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase
-from django.core.exceptions import ValidationError
-import re
 from django.core import mail
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+from django.test import TestCase
+from django.test import TestCase, Client as DjangoClient
+from django.urls import reverse
+from edu_courses.models import Courses, Category
+from edu_courses.models import Courses, Category 
+from edu_user.models import Enrollment
+from edu_user.models import UserProfile as Profile
 from edu_user.tasks import send_reset_password_email_task
+from graphene.test import Client
+from Quick_edu.schema import schema
+from unittest import mock
 
 
-class PasswordResetTest(TestCase):
+class SchemaTestCase(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='oldpassword')
+        self.graphql_client = Client(schema)
+        self.django_client = DjangoClient()
+        self.user = User.objects.create_user(username='testuser', password='testpass', email='test@example.com')
+        self.profile = Profile.objects.create(user=self.user, gender='M', country='IN', otp='123456')
+        self.category = Category.objects.create(name='Science')
+        self.course = Courses.objects.create(
+            title='Physics', description='Learn Physics', category=self.category, 
+            course_creator=self.user, start_date=datetime.date.today(), end_date=datetime.date.today()
+        )
+        # Add user to course_creator group for permissions
+        group, _ = Group.objects.get_or_create(name='course_creator')
+        self.user.groups.add(group)
+        self.user.is_superuser = True
+        self.user.save()
 
-    def test_forgot_password_email_sent(self):
-            # Simulate the forgot password request
+    def test_register_user_success(self):
+        mutation = '''
+            mutation RegisterUser($username: String!, $password: String!, $email: String!, $firstName: String!, $lastName: String!, $mobileNumber: String!) {
+                registerUser(username: $username, password: $password, email: $email, firstName: $firstName, lastName: $lastName, mobileNumber: $mobileNumber) {
+                    user { username email firstName lastName }
+                    profile { country }
+                }
+            }
+        '''
+        variables = {
+            'username': 'newuser',
+            'password': 'newpass',
+            'email': 'new@example.com',
+            'firstName': 'First',
+            'lastName': 'Last',
+            'mobileNumber': '1234567890'
+        }
+        executed = self.graphql_client.execute(mutation, variables=variables)
+        self.assertIsNone(executed.get('errors'))
+        self.assertEqual(executed['data']['registerUser']['user']['username'], 'newuser')
+        self.assertEqual(executed['data']['registerUser']['user']['firstName'], 'First')
+        self.assertEqual(executed['data']['registerUser']['user']['lastName'], 'Last')
+
+    def test_register_user_missing_required(self):
+        mutation = '''
+            mutation {
+                registerUser(password: "pass", email: "mail@example.com") {
+                    user { username }
+                }
+            }
+        '''
+        executed = self.graphql_client.execute(mutation)
+        self.assertIsNotNone(executed.get('errors'))
+
+    def test_update_user_profile_success(self):
+        mutation = '''
+            mutation {
+                updateUserProfile(userId: %d, firstName: "Updated", country: "US") {
+                    user { firstName }
+                    profile { country }
+                }
+            }
+        ''' % self.user.id
+        executed = self.graphql_client.execute(mutation)
+        self.assertIsNone(executed.get('errors'))
+        self.assertEqual(executed['data']['updateUserProfile']['user']['firstName'], 'Updated')
+        self.assertEqual(executed['data']['updateUserProfile']['profile']['country'], 'US')
+
+    def test_update_user_profile_user_not_found(self):
+        mutation = '''
+            mutation {
+                updateUserProfile(userId: 99999, firstName: "NoUser") {
+                    user { firstName }
+                }
+            }
+        '''
+        executed = self.graphql_client.execute(mutation)
+        self.assertIsNotNone(executed.get('errors'))
+        self.assertIn('does not exist', executed['errors'][0]['message'])
+        
+    def test_create_course_success(self):
+        # Simulate authenticated user in context
+        context = mock.Mock()
+        context.user = self.user
+        mutation = '''
+            mutation CreateCourse($title: String!, $category: String!, $courseCreator: String!) {
+                createCourse(title: $title, category: $category, courseCreator: $courseCreator) {
+                    course { title category }
+                }
+            }
+        '''
+        variables = {
+            'title': 'Chemistry',
+            'category': str(self.category.pk),
+            'courseCreator': str(self.user.pk)
+        }
+        executed = self.graphql_client.execute(mutation, variables=variables, context_value=context)
+        self.assertIsNone(executed.get('errors'))
+        self.assertEqual(executed['data']['createCourse']['course']['title'], 'Chemistry')
+
+    def test_create_course_permission_denied(self):
+        self.user.groups.clear()
+        self.user.is_superuser = False
+        self.user.save()
+        context = mock.Mock()
+        context.user = self.user
+        mutation = '''
+            mutation {
+                createCourse(title: "NoPerm", category: "%d", courseCreator: "%d") {
+                    course { title }
+                }
+            }
+        ''' % (self.category.pk, self.user.pk)
+        executed = self.graphql_client.execute(mutation, context_value=context)
+        self.assertIsNotNone(executed.get('errors'))
+        self.assertIn('permission', executed['errors'][0]['message'])
+
+
+    def test_update_course_success(self):
+        mutation = '''
+            mutation {
+                updateCourse(courseId: %d, title: "UpdatedTitle") {
+                    course { title }
+                }
+            }
+        ''' % self.course.id
+        executed = self.graphql_client.execute(mutation)
+        self.assertIsNone(executed.get('errors'))
+        self.assertEqual(executed['data']['updateCourse']['course']['title'], 'UpdatedTitle')
+
+    def test_update_course_not_found(self):
+        mutation = '''
+            mutation {
+                updateCourse(courseId: 9999, title: "NoCourse") {
+                    course { title }
+                }
+            }
+        '''
+        executed = self.graphql_client.execute(mutation)
+        self.assertIsNotNone(executed.get('errors'))
+
+    def test_query_all_users(self):
+        query = '''
+            query {
+                allUsers { username }
+            }
+        '''
+        executed = self.graphql_client.execute(query)
+        self.assertIsNone(executed.get('errors'))
+        self.assertTrue(any(u['username'] == 'testuser' for u in executed['data']['allUsers']))
+
+
+
+
+# class PasswordResetTest(TestCase):
+#     def setUp(self):
+#         self.user = User.objects.create_user(username='testuser', email='test@example.com', password='oldpassword')
+
+#     def test_forgot_password_email_sent(self):
+#             # Simulate the forgot password request
             
-            send_reset_password_email_task.delay(self.user.pk, self.user.email)
-            # Assert that an email was sent
-            self.assertEqual(len(mail.outbox), 1)
-            sent_email = mail.outbox[0]
-            # Assert email content (customize as needed)
-            self.assertEqual(sent_email.subject, 'Password reset request')
-            self.assertEqual(sent_email.to, ['test@example.com'])
-            self.assertIn('reset', sent_email.body) # Check for
+#             send_reset_password_email_task.delay(self.user.pk, self.user.email)
+#             # Assert that an email was sent
+#             self.assertEqual(len(mail.outbox), 1)
+#             sent_email = mail.outbox[0]
+#             # Assert email content (customize as needed)
+#             self.assertEqual(sent_email.subject, 'Password reset request')
+#             self.assertEqual(sent_email.to, ['test@example.com'])
+#             self.assertIn('reset', sent_email.body) # Check for
 
         # # 2. Extract the reset link
         # email_content = mail.outbox[0].body

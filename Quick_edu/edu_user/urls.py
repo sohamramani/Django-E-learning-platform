@@ -9,6 +9,7 @@ from edu_user import utils
 urlpatterns = [
     # auth urls
     path("signupapi/", views.signupapi, name="signupapi"), #this is the signup api that handles user registration
+    
     path("signup/", views.SignUpView.as_view(), name="signup"), #this is the normal view for signup
     path("login/", views.login_user, name="login"),
     path('verify_otp/<int:user_id>/', views.verify_otp, name='verify_otp'),

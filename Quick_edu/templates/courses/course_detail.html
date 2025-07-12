@@ -14,7 +14,7 @@
         </div>
         <div class="col-md-5 text-end">
         {% if object.image %}
-                <img src="{{ object.image.url }}" class="img-fluid rounded-start border border-2 border-black" alt="..." style=" width: 550px; height: 350px;">
+                <img src="{{ object.image.url }}" class="img-fluid rounded-start border border-2 border-black" alt="Course image" style=" width: 550px; height: 350px;">
         {% else %}
                 <img class="card-img-top border-2 border-black" src="" alt="image" >
         {% endif %} 
@@ -33,6 +33,31 @@
         </div>
     </div>
 </div>
+{% if user == object.course_creator or user.is_superuser %}
+    <form id="edit-course-form" class="mt-4 border p-3 bg-light">
+        <h4>Edit Course Details</h4>
+        <input type="hidden" id="edit-course-id" value="{{ object.id }}">
+        <div class="mb-2">
+            <label>Title:</label>
+            <input type="text" id="edit-course-title" class="form-control" value="{{ object.title }}">
+        </div>
+        <div class="mb-2">
+            <label>Description:</label>
+            <textarea id="edit-course-description" class="form-control">{{ object.description }}</textarea>
+        </div>
+        <div class="mb-2">
+            <label>Start Date:</label>
+            <input type="date" id="edit-course-start" class="form-control" value="{{ object.start_date|date:'Y-m-d' }}">
+        </div>
+        <div class="mb-2">
+            <label>End Date:</label>
+            <input type="date" id="edit-course-end" class="form-control" value="{{ object.end_date|date:'Y-m-d' }}">
+        </div>
+        <button type="submit" class="btn btn-warning">Update Course</button>
+        <span id="edit-course-result" class="ms-3"></span>
+    </form>
+{% endif %}
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -46,6 +71,52 @@ esocket.onmessage = (event) => {
         alert(`Enrollment Alert: ${data.message} for user ${data.username}`); // Display in an alert for now
     }
     };
+
+
+document.getElementById('edit-course-form').onsubmit = async function(e) {
+    e.preventDefault();
+    const courseId = document.getElementById('edit-course-id').value;
+    const title = document.getElementById('edit-course-title').value;
+    const description = document.getElementById('edit-course-description').value;
+    const startDate = document.getElementById('edit-course-start').value;
+    const endDate = document.getElementById('edit-course-end').value;
+
+    const mutation = `
+        mutation UpdateCourse($courseId: Int!, $title: String, $description: String, $startDate: Date, $endDate: Date) {
+            updateCourse(courseId: $courseId, title: $title, description: $description, startDate: $startDate, endDate: $endDate) {
+                course {
+                    id
+                    title
+                    description
+                    startDate
+                    endDate
+                }
+            }
+        }
+    `;
+    const variables = { 
+        courseId: parseInt(courseId), 
+        title, 
+        description, 
+        startDate: startDate || null, 
+        endDate: endDate || null 
+    };
+
+    const response = await fetch('/graphql/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ query: mutation, variables })
+    });
+    const result = await response.json();
+    if (result.data && result.data.updateCourse && result.data.updateCourse.course) {
+        document.getElementById('edit-course-result').innerText = "Course updated! Relode the page for see update";
+    } else {
+        document.getElementById('edit-course-result').innerText = "Update failed.";
+    }
+};
 </script>
 
 {% endblock %}

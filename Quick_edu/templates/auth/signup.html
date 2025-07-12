@@ -134,45 +134,4 @@
 <script src="{% static 'js/jquery.validate.js' %}"></script>
 <script src="{% static 'js/signup.js' %}"></script>
 
-
-<script>
-    const mutation = `
-    mutation CreateUserMutation($username: String!, $password: String!, $email: String!, $ , ) {
-        createUser(username: $username, password: $password, email: $email, phone: $phone, address: $address) {
-            user {
-                id
-                username
-                email
-            }
-            profile {
-                id
-                phone
-                address
-            }
-        }
-    }
-`;
-
-const variables = {
-    username: 'testuser',
-    password: 'password123',
-    email: 'test@example.com',
-    phone: '123-456-7890',
-    address: '123 Main St'
-};
-
-fetch('/graphql', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-        query: mutation,
-        variables: variables,
-    }),
-})
-.then(response => response.json())
-.then(data => console.log(data))
-.catch(error => console.error('Error:', error));
-</script>
 {% endblock %}

@@ -1,0 +1,169 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<h1>Course List</h1>
+<div class="row justify-content-between">
+    <div class="col-4">
+        <select id="sort-order" class="form-select col-4 border border-2 border-warning" >
+            <option value="">Sort By</option>
+            <option value="title">Title (A-Z)</option>
+            <option value="-title">Title (Z-A)</option>
+            <option value="start_date">Start Date (Oldest)</option>
+            <option value="-start_date">Start Date (Newest)</option>
+        </select>
+    </div>
+    <div class="col-4 ">
+        <div class="input-group mb-3">
+            <input type="text" id="filter-title" class="form-control border-2 border-warning" placeholder="Filter by title" aria-label="Filter by title" aria-describedby="title-search-btn">
+            <button class="btn btn-outline-warning btn-warning w-25 p-2 text-black" type="button" id="title-search-btn">Search</button>
+        </div>
+    </div>
+</div>
+<div class="card-group row row-cols-1 row-cols-md-3 g-4" id="course-container">
+</div>
+
+<div class="text-center my-4">
+    <button id="load-more" class="btn btn-warning" style="display:none;">Load More</button>
+</div>  
+
+<script>
+let endCursor = null;
+let hasNextPage = false;
+
+async function fetchCourses(isLoadMore = false) {
+    const filterTitle = document.getElementById('filter-title').value;
+    const sortOrder = document.getElementById('sort-order').value;
+    const query = `
+        query ($first: Int, $after: String, $title: String, $order_by: String) {
+            allCourses(first: $first, after: $after, title: $title, orderBy: $order_by) {
+                edges {
+                    node {
+                        id
+                        title
+                        description
+                        imageUrl
+                        category
+                        startDate
+                        endDate
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+            }
+        }
+    `;
+    const variables = { 
+        first: 6, 
+        after: isLoadMore ? endCursor : null, 
+        title: filterTitle || null,
+        order_by: sortOrder || null,
+    };
+    try {
+        const response = await fetch('/graphql/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ query, variables })
+        });
+        const data = await response.json();
+        const edges = data.data.allCourses.edges;
+        const courses = edges.map(edge => edge.node);
+
+        if (isLoadMore) {
+            appendCourses(courses);
+        } else {
+            displayCourses(courses);
+        }
+
+        // Update pagination state
+        endCursor = data.data.allCourses.pageInfo.endCursor;
+        hasNextPage = data.data.allCourses.pageInfo.hasNextPage;
+        const loadMoreBtn = document.getElementById('load-more');
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = hasNextPage ? 'inline-block' : 'none';
+        }
+    } catch (error) {
+        console.error('Error fetching courses:', error);
+        document.getElementById('course-container').innerHTML = '<p>Error loading courses.</p>';
+    }
+}
+
+function displayCourses(courses) {
+    const container = document.getElementById('course-container');
+    container.innerHTML = '';
+    if (!courses.length) {
+        container.innerHTML = '<p>No courses available.</p>';
+        return;
+    }
+    courses.forEach(course => container.appendChild(createCourseCard(course)));
+}
+
+function appendCourses(courses) {
+    const container = document.getElementById('course-container');
+    courses.forEach(course => container.appendChild(createCourseCard(course)));
+}
+
+function decodeRelayId(relayId) {
+    try {
+        const decoded = atob(relayId);
+        // Format: "CourseType:1113"
+        return decoded.split(':')[1];
+    } catch {
+        return relayId;
+    }
+}
+
+function createCourseCard(course) {
+    const courseDiv = document.createElement('div');
+
+    const courseId = decodeRelayId(course.id);
+
+    let imgSrc = ''
+    if (course.imageUrl) {
+        imgSrc = course.imageUrl;
+    }
+
+    const imageHtml = `<img class="card-img-top" src="${imgSrc}" alt="Course image" style="width: 412px; height: 200px; object-fit: cover;">`;
+
+    courseDiv.className = 'col-md-4 d-flex align-items-stretch mb-4';
+    courseDiv.innerHTML = `
+        <div class="card border-warning border-2 h-100">
+            ${imageHtml}
+            <div class="card-body">
+                <h4 class="card-header mb-3 text-center">${course.title}</h4>
+                <p class="card-text col-auto">${course.description}</p>
+            </div>
+            <div class="card-text ms-3">
+                <strong>Category: </strong>${course.category || ''}<br>
+                <strong>Start Date: </strong><span>${course.startDate || ''}</span><br> 
+                <strong>End Date: </strong><span>${course.endDate || ''}</span>
+            </div>
+            <div class="card-footer">
+                <a href="/courses/courses/${courseId}/" class="btn btn-dark mt-2">Learn More</a>
+            </div>
+        </div>
+    `;
+    return courseDiv;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetchCourses();
+    document.getElementById('sort-order').onchange = function() {
+        endCursor = null;
+        fetchCourses();
+    };
+    document.getElementById('title-search-btn').onclick = function() {
+        endCursor = null;
+        fetchCourses();
+    };
+    document.getElementById('load-more').onclick = function() {
+        fetchCourses(true);
+    };
+});
+</script>
+{% endblock %}

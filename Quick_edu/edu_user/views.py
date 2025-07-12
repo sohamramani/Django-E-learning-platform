@@ -50,14 +50,14 @@ paypalrestsdk.configure({
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
-
-def home(request):
-    return render(request, "base/home.html")
-
-
+# for api signup
 def signupapi(request):
     country_choices = CountryField().choices
     return render(request, 'auth/signupapi.html', {'country': country_choices})
+
+
+def home(request):
+    return render(request, "base/home.html")
 
 
 class SignUpView(View):
@@ -153,9 +153,13 @@ def profile(request):
     if request.user.is_authenticated:
         user = request.user
         userprofile = UserProfile.objects.get(user=user)
+        country_choices = userprofile._meta.get_field('country').choices
+        gender_choices = userprofile._meta.get_field('gender').choices
         context = {     
             'user': user,
             'userprofile': userprofile,
+            'country_choices': country_choices,
+            'gender_choices': gender_choices,
         }
         return render(request, 'auth/profile.html', context)
     else:
