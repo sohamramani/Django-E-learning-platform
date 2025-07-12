@@ -1,0 +1,186 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+<div class="container rounded bg-white mt-5 mb-5" style=" height: 1000px;">
+    <div class="row">
+        <div class="col-3 ">
+            <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                {% if userprofile.profile_picture %}
+                <div class="d-flex align-items-center justify-content-center" style="width:260px; height:260px;">
+                    <div class="rounded-circle border border-5 border-warning d-flex align-items-center justify-content-center" style="width:250px; height:250px;">
+                        <div class="rounded-circle border border-opacity-75 border-5 border-black d-flex align-items-center justify-content-center" style="width:240px; height:240px;">
+                            <img class="rounded-circle border border-5 border-warning"
+                                width="230" height="230"
+                                style="object-fit:cover;"
+                                src="{{ userprofile.profile_picture.url }}"
+                                alt="image">
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="d-flex align-items-center justify-content-center" style="width:260px; height:260px;">
+                    <div class="rounded-circle border border-5 border-warning d-flex align-items-center justify-content-center" style="width:250px; height:250px;">
+                        <div class="rounded-circle border border-opacity-75 border-5 border-black d-flex align-items-center justify-content-center" style="width:240px; height:240px;">
+                            <img class="rounded-circle border border-5 border-warning"
+                                width="230" height="230"
+                                style="object-fit:cover; background: #f8f9fa;"
+                                src=""
+                                alt="image">
+                        </div>
+                    </div>
+                </div>
+                <p class="text-danger">You don't have a profile picture.</p>
+                {% endif %}
+                <span class="fw-bolder fs-4">{{ user.username }}</span>
+                <span class="text-black-50">{{ user.email }}</span>
+                {% if userprofile.resume %}
+                    <h6 class="card-title">Resume:<a href="{% url 'download_file' %}">Download</a></h6>
+                        
+                        
+                        
+                {% else %}
+                    <span><h6 class="card-title">Resume:</h6></span>
+                {% endif %} 
+            </div>
+        </div>
+        <div class="col-6 ">
+            <div class="p-3 py-5 ">
+                <form id="edit-profile-form" enctype="multipart/form-data" class="mt-4 border p-3 bg-light border-2 border-black">
+                    <h4 class="text-center">Edit Profile</h4>
+                    <input type="hidden" id="edit-user-id" value="{{ user.id }}">
+                    <div class="mb-2">
+                        <h5>Email:</h5>
+                        <input type="email" id="edit-email" class="form-control border-2 border-warning" value="{{ user.email }}">
+                    </div>
+                    <div class="mb-2">
+                        <h5>First Name:</h5>
+                        <input type="text" id="edit-first-name" class="form-control border-2 border-warning" value="{{ user.first_name }}">
+                    </div>
+                    <div class="mb-2">
+                        <h5>Last Name:</h5>
+                        <input type="text" id="edit-last-name" class="form-control border-2 border-warning" value="{{ user.last_name }}">
+                    </div>
+                    <div class="mb-2">
+                        <h5>Gender:</h5>
+                        <select id="edit-gender" class="form-control border-2 border-warning">
+                            {% for code, label in gender_choices %}
+                                <option value="{{ code }}" {% if userprofile.gender == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <h5>Country:</h5>
+                        <select id="edit-country" class="form-control border-2 border-warning">
+                            {% for code, name in country_choices %}
+                                <option value="{{ code }}" {% if userprofile.country == code %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <h5>Date of Birth:</h5>
+                        <input type="date" id="edit-birth-date" class="form-control border-2 border-warning" value="{{ userprofile.birth_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="mb-2">
+                        <h5>Phone Number:</h5>
+                        <input type="text" id="edit-mobile-number" class="form-control border-2 border-warning" value="{{ userprofile.mobile_number }}">
+                    </div>
+                    <div class="mb-2">
+                        <h5>Profile Picture:</h5>
+                        <input type="file" id="edit-profile-picture" class="form-control border-2 border-warning">
+                    </div>
+                    <div class="mb-2">
+                        <h5>Resume:</h5>
+                        <input type="file" id="edit-resume" class="form-control border-2 border-warning">
+                    </div>
+                    <button type="submit" class="btn btn-warning">Update Profile</button>
+                    <span id="edit-profile-result" class="ms-3"></span>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+document.getElementById('edit-profile-form').onsubmit = async function(e) {
+    e.preventDefault();
+    const userId = document.getElementById('edit-user-id').value;
+    const email = document.getElementById('edit-email').value;
+    const firstName = document.getElementById('edit-first-name').value;
+    const lastName = document.getElementById('edit-last-name').value;
+    const gender = document.getElementById('edit-gender').value;
+    const country = document.getElementById('edit-country').value;
+    const birthDate = document.getElementById('edit-birth-date').value;
+    const mobileNumber = document.getElementById('edit-mobile-number').value;
+    const profilePicture = document.getElementById('edit-profile-picture').files[0];
+    const resume = document.getElementById('edit-resume').files[0];
+
+    const mutation = `
+        mutation UpdateUserProfile(
+            $userId: Int!, $firstName: String, $lastName: String, $email: String,
+            $gender: String, $birthDate: Date, $country: String,
+            $profilePicture: Upload, $mobileNumber: String, $resume: Upload
+        ) {
+            updateUserProfile(
+                userId: $userId, firstName: $firstName, lastName: $lastName, email: $email,
+                gender: $gender, birthDate: $birthDate, country: $country,
+                profilePicture: $profilePicture, mobileNumber: $mobileNumber, resume: $resume
+            ) {
+                user { id firstName lastName email }
+                profile { gender birthDate country mobileNumber }
+            }
+        }
+    `;
+
+    // Use FormData for file uploads
+    const formData = new FormData();
+formData.append('operations', JSON.stringify({
+    query: mutation,
+    variables: {
+        userId: parseInt(userId),
+        firstName, lastName, email, gender, birthDate, country, mobileNumber,
+        profilePicture: profilePicture ? null : undefined,
+        resume: resume ? null : undefined
+    }
+}));
+    const map = {};
+    let fileIndex = 0;
+    if (profilePicture) {
+        map[fileIndex] = ["variables.profilePicture"];
+        formData.append(fileIndex.toString(), profilePicture);
+        fileIndex++;
+    }
+    if (resume) {
+        map[fileIndex] = ["variables.resume"];
+        formData.append(fileIndex.toString(), resume);
+    }
+    formData.append('map', JSON.stringify(map));
+
+    const response = await fetch('/graphql/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        body: formData
+    });
+    let result;
+    try {
+        result = await response.json();
+    } catch (e) {
+        document.getElementById('edit-profile-result').innerText = "Server error. Check your input and try again.";
+        return;
+    }
+        if (result.errors && result.errors.length > 0) {
+        document.getElementById('edit-profile-result').innerText = result.errors[0].message;
+        return;
+    }
+    if (result.data && result.data.updateUserProfile && result.data.updateUserProfile.user) {
+        document.getElementById('edit-profile-result').innerText = "Profile updated!";
+    } else {
+        document.getElementById('edit-profile-result').innerText = "Update failed.";
+    }
+};
+
+
+</script>
+{% endblock %}

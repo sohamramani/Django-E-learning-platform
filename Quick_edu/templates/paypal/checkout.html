@@ -1,0 +1,59 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div style=" min-height: 1000px;">
+<section class="fdb-block container py-5" style="background-image: url('/static/images/plan_background_img.jpeg');">
+    <div class="py-5">
+        <div class="row text-center">
+            <div class="col">
+                <h1 class="text-black fw-bold fst-italic">Pricing</h1>
+            </div>
+        </div>
+
+        <div class="row mt-5 align-items-center mx-3">
+
+            <div class="col-12 col-sm-10 col-md-8 m-auto col-lg-4 text-center pt-4 pt-lg-0 border border-1 border-black">
+                <div class="fdb-box p-4">
+                    <h2 class="fst-italic">PayPal</h2>
+                    <p class="h1 mt-5 mb-5">$10</p>
+                    <form action="{% url 'create_payment' %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-dark">Pay with PayPal</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-10 col-md-8 m-auto col-lg-4 text-center pt-4 pt-lg-0 border border-1 border-black">
+                <div class="fdb-box p-4">
+                    <h2 class="fst-italic">RazorPay</h2>
+                    <p class="h1 mt-5 mb-5">INR 800</p>
+                    <form action="{% url 'payment' %}" method='POST'>
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-dark">Pay with RazorPay</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-10 col-md-8 m-auto col-lg-4 text-center pt-4 pt-lg-0 border border-1 border-black">
+                <div class="fdb-box p-4">
+                    <h2 class="fst-italic">Cashfree</h2>
+                    <p class="h1 mb-5 mt-5">INR 800</p>
+                    <form action="{% url 'initiate_payment'%}" method="POST" class="text-center">
+                        {% csrf_token %}
+                        <input type="hidden" name="order_id" value="{{ order_id }}">
+                        <button type="submit" class="btn btn-dark">Pay with Cashfree</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</div>
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+<script>
+    const cashfree = Cashfree({
+    mode:"sandbox" //or production
+});
+</script>
+{% endblock %}

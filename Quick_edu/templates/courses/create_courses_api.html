@@ -1,0 +1,162 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div style=" height: 1000px;">
+    <form id="courseformapi" method="post" action="{% url 'create_courses_api' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% load static %}
+
+        {% load widget_tweaks %}
+        <div class="col-7">
+            <div class="row col ">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Title Of Course: </h5>
+                    </div>
+                    <div class="form-group col">
+                        <input type="text" class="form-control border-2 border-warning mb-3" id="title" name="title" placeholder="Enter Course Title">
+                    </div>
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Description: </h5>
+                    </div>
+                    <textarea type="text" class="form-control border-2 border-warning mb-3" rows="8" cols="30" id="description" name="description" placeholder="Enter Course description"></textarea>
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Course Start Date: </h5>
+                    </div>
+                    <div class="form-group col">
+                    <input type="date" class="form-control border-2 border-warning mb-3" id="start_date" name="start_date">
+                    </div>
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Course End Date: </h5>
+                    </div>
+                    <div class="form-group col">
+                    <input type="date" class="form-control border-2 border-warning mb-3" id="end_date" name="end_date">
+                    </div>
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Course image: </h5>
+                    </div>
+                    <input type="file" class="form-control border-2 border-warning mb-3" id="image" name="image">
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Course Catagory: </h5>
+                    </div>
+                    <div class="input-group">
+                        <h6>please select catagory</h6>
+                    </div>
+                    <select class="form-control border-2 border-warning mb-3 category" id="category" name="category">
+                        {% for category in catagory_choices %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <input type="hidden" name="course_creator" value="{{ user.id }}">
+            <button type="submit" class="btn btn-warning w-25 p-3">Create Course</button>
+        </div>
+    </form>
+</div>
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'js/additional-methods.js' %}"></script>
+<script src="{% static 'js/jquery.validate.js' %}"></script>
+<script>
+        var $form = $('#courseformapi');
+        $form.on('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+
+        var mutation = `
+            mutation CreateCourse(
+                $title: String!, $description: String!, 
+                $startDate: Date, $endDate: Date, 
+                $image: Upload, $category: String!, 
+                $courseCreator: String!
+            ) {
+                createCourse(
+                    title: $title, description: $description, startDate: $startDate,
+                    endDate: $endDate, image: $image,
+                    category: $category, courseCreator: $courseCreator
+                ) {
+                    course { id title courseCreator { id username } }
+                }
+            }
+        `;
+
+            formData.append('operations', JSON.stringify({
+                query: mutation,
+                variables: {
+                    title: formData.get('title'),
+                    description: formData.get('description'),
+                    startDate: formData.get('start_date'),
+                    endDate: formData.get('end_date'),
+                    image: null,
+                    category: formData.get('category'),
+                    courseCreator: formData.get('course_creator'),
+                }
+            }));
+
+            formData.append('map', JSON.stringify({
+                '0': ['variables.image'],
+            }));
+
+            if ($form.find('input[name="image"]')[0] && $form.find('input[name="image"]')[0].files[0]) {
+                formData.append('0', $form.find('input[name="image"]')[0].files[0]);
+            }
+
+            $.ajax({
+                url: '/graphql/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(result) {
+                    if (result.data && result.data.createCourse) {
+                        // Show the message in the #messages div
+                        $('#message_success').html(
+                            `<div class=" alert alert-success w-25 d-flex justify-content-between float-end alert-dismissible">
+                                <div>${result.data.createCourse.message || 'Course created successfully!'}</div>
+                                <a href="" class="close text-decoration-none text-black" data-dismiss="alert" aria-label="close">&times;</a>
+                            </div> `
+                        );
+                        // Optionally redirect after a delay
+                        setTimeout(function() {
+                            window.location.href = '/courses/list/';
+                        }, 2000);
+                    } else {
+                        $('#message_error').html(
+                            `<div class=" alert alert-danger w-25 d-flex justify-content-between float-end alert-dismissible">
+                                <div>Course creation failed!</div>
+                                <a href="" class="close text-decoration-none text-black" data-dismiss="alert" aria-label="close">&times;</a>
+                            </div> `
+                        );
+                        console.error(result.errors);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('An error occurred!');
+                    console.error(error);
+                }
+            });
+        });
+</script>
+
+
+{% endblock %}

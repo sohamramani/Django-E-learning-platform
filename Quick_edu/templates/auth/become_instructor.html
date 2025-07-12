@@ -1,0 +1,30 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div style=" height: 1000px;">
+    <h2>Become An Instructor</h2>
+    <form method="post" action="{% url 'become_an_instructor' %}">
+        {% csrf_token %}
+        <div class="col-7">
+            <!-- username -->
+            <div class="input-group">
+                <div class="input-group me-4">
+                    <h5>UserName:</h5>
+                </div>
+                <input id="username" type="text" class="form-control border-2 border-warning" placeholder="User Name" name="username">
+            </div>
+            <div class="text-danger mb-3 " id="username-valid"></div>
+
+            <!-- email -->
+            <div class="input-group">
+                <div class="input-group me-4">
+                    <h5>Email:</h5>
+                </div>
+                <input id="email" type="email" name="email" class="form-control border-2 border-warning" placeholder="email">
+            </div>
+            <div class="text-danger mb-4 " id="email-valid"></div>
+            <button type="submit" class="btn btn-warning w-25 p-3">send mail</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

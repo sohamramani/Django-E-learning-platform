@@ -1,0 +1,97 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container row">
+  <div class="col-6 text-center d-flex flex-column justify-content-center">
+    <h1 class="text-start">Unlock Your Potential with Quick edu</h1>
+      <p class="text-start">Welcome to Quick edu, where learning knows 
+                          no bounds. We believe that education 
+                          is the key to personal and professional growth, 
+                          and we're here to guide you on your journey to success. 
+                          </p>
+      <a href="{% url 'become_an_instructor' %}" class="btn btn-warning rounded-5 px-sm-2 py-2  cal-btn">Start your instructor journey</a>
+      {% if user.is_authenticated %}
+        {% if request.user.groups.all.0.name != course_creator %}
+          <a href="{% url 'create_courses_api' %}" class="btn btn-danger rounded-5 px-sm-2 py-2  cal-btn">create courses with api</a>
+        {% endif %}
+        <a href="{% url 'course_list_api' %}" class="btn btn-success rounded-5 px-sm-2 py-2  cal-btn">view courses with api</a>
+      {% else %}
+        <a href="{% url 'signupapi' %}" class="btn btn-dark rounded-5 px-sm-2 py-2  cal-btn">Rgister with api</a>
+      {% endif %}
+      
+      {% if user.is_authenticated %}
+          {% if request.user.groups.all.0.name != course_creator and request.user.groups.all.1.name != student %}
+                  <button class="btn btn-dark px-2 py-2 rounded-5" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Report & random</button>
+                  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                      <div class="offcanvas-header">
+                          <h5 id="offcanvasRightLabel">Reports & Random</h5>
+                          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                      </div>
+                      <div class="offcanvas-body">
+                              <span class="hover"><a class="text-decoration-none list-group-item list-group-item-action text-black m-2 fs-4 fw-bolder" href="{% url 'reports' %}">Reports</a></span>
+                              <span class="hover"><a class="text-decoration-none list-group-item list-group-item-action text-danger m-2 fs-4 fw-bolder" href="{% url 'random_courses' %}">Random Courses</a></span>
+                              <span class="hover"><a class="text-decoration-none list-group-item list-group-item-action text-danger m-2 fs-4 fw-bolder" href="{% url 'random_user' %}">Random User</a></span>
+                              <span class="hover"><a class="text-decoration-none list-group-item list-group-item-action text-danger m-2 fs-4 fw-bolder" href="{% url 'random_enrolls' %}">Random Enrollments</a></span>
+                      </div>
+                  </div> 
+          {% endif %}
+      {% endif %}
+
+
+      
+    </div>
+  <div class="col-6 text-end">
+    {% load static %}
+    <img src="{% static 'images/Start_your_instructor_journey.png' %}" alt="members" class="h-100 w-100">
+  </div>
+</div>
+<div class="container">
+  <div class="text-dark py-5 ">
+      <h1 class="text-center mb-4">Quick edu</h1>
+      <h3 class="text-center mb-4">Unlimited Learnig</h3>
+      <div class="d-grid gap-2 col-3 mx-auto">
+        <a href="{% url 'course_list' %}" class="btn btn-warning rounded-5 px-sm-5 py-2  cal-btn">View Courses</a>
+      </div>
+      <p class=" text-center my-5 pb-5">
+          Designed for emerging creatives and 
+          established professionals, Quick edu builds your 
+          skills and empowers your passion </br> through pioneering 
+          courses in six domains.
+      </p> 
+  </div>
+</div>
+
+<div class="container row mb-5">
+  <div class="col-6 text-end">
+    {% load static %}
+    <img src="{% static 'images/Become_an_Instructor.png' %}" alt="Instructor" class="h-100 w-100">
+  </div>
+  <div class="col-6 text-center d-flex flex-column justify-content-center">
+    <h1 class="text-start">Become an Instructor</h1>
+      <p class="text-start">Instructors from around the 
+                          world teach millions of students on Byway. 
+                          We provide the tools and skills to teach what you love.
+                          </p>
+      <a href="{% url 'become_an_instructor' %}" class="btn btn-dark  px-sm-5 py-1 me-5 ms-5  cal-btn">Start Your Instructor Journey |-></a>
+</div>
+
+<div class="container row mb-5">
+    <div class="col-6 text-center d-flex flex-column justify-content-center">
+      <h1 class="text-start">Transform your life through education</h1>
+        <p class="text-start">Learners around the world are 
+                            launching new careers, advancing in their 
+                            fields, and enriching their lives.
+                            </p>
+        <a href="{% url 'course_list' %}" class="btn btn-dark  px-sm-5 py-1 me-5 ms-5  cal-btn">Checkout Courses |-></a>
+
+    </div>
+    <div class="col-6 text-end">
+      {% load static %}
+      <img src="{% static 'images/Transform_your_life_through_education.png' %}" alt="Instructor" class="h-100 w-100">
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+</script>
+{% endblock %}

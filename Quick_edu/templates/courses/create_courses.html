@@ -1,0 +1,79 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div style=" height: 1000px;">
+    <form id="courseForm" method="post" action="{% url 'create_courses' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% load static %}
+        {% load widget_tweaks %}
+        <div class="col-7">
+            <div class="row col ">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Title Of Course: </h5>
+                    </div>
+                    <div class="form-group col">
+                        <input type="text" class="form-control border-2 border-warning mb-3" id="title" name="title" placeholder="Enter Course Title">
+                    </div>
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Description: </h5>
+                    </div>
+                    <textarea type="text" class="form-control border-2 border-warning mb-3" rows="8" cols="30" id="description" name="description" placeholder="Enter Course description"></textarea>
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Course Start Date: </h5>
+                    </div>
+                    <div class="form-group col">
+                    <input type="date" class="form-control border-2 border-warning mb-3" id="start_date" name="start_date">
+                    </div>
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Course End Date: </h5>
+                    </div>
+                    <div class="form-group col">
+                    <input type="date" class="form-control border-2 border-warning mb-3" id="end_date" name="end_date">
+                    </div>
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Course image: </h5>
+                    </div>
+                    <input type="file" class="form-control border-2 border-warning mb-3" id="image" name="image">
+                </div>
+            </div>
+            <div class="row col-lg">
+                <div class=" col-md-6 input-group ">
+                    <div class="input-group">
+                        <h5>Course Catagory: </h5>
+                    </div>
+                    <div class="input-group">
+                        <h6>please select catagory</h6>
+                    </div>
+                    <select class="form-control border-2 border-warning mb-3 category" id="category" name="category">
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-warning w-25 p-3">Create Course</button>
+        </div>
+    </form>
+</div>
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'js/additional-methods.js' %}"></script>
+<script src="{% static 'js/jquery.validate.js' %}"></script>
+<script src="{% static 'js/create_courses.js' %}"></script>
+{% endblock %}
